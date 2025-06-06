@@ -1,8 +1,8 @@
-
 pipeline {
     agent any
     environment {
         AWS_REGION = 'us-east-1'
+        BUCKET_NAME = 'priyanka-portfolio-bucket'
     }
     stages {
         stage('Checkout Code') {
@@ -18,7 +18,7 @@ pipeline {
                 ]]) {
                     sh '''
                     aws configure set region $AWS_REGION
-                    aws s3 cp ./ s3://priyanka-portfolio-bucket/ --recursive --acl public-read
+                    aws s3 cp ./ s3://$BUCKET_NAME/ --recursive --acl public-read
                     '''
                 }
             }
@@ -30,5 +30,3 @@ pipeline {
         }
     }
 }
-
-
