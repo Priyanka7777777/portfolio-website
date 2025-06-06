@@ -1,49 +1,50 @@
+
 pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'
-        S3_BUCKET = 'priyanka-portfolio-bucket'
+        AWS_REGION = 'us-east-1' // Change this to your AWS region
+        S3_BUCKET = 'priyanka-portfolio-bucket' // Change to your actual bucket name
+        AWS_CREDENTIALS = credentials('aws-credentials-id') // Jenkins credential ID for AWS access keys
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/Priyanka7777777/portfolio-website.git', branch: 'main'
+                git(
+                    url: 'https://github.com/Priyanka7777777/portfolio-website.git',
+                    credentialsId: 'github-credentials-id', // Replace with your Jenkins GitHub credential ID
+                    branch: 'main'
+                )
             }
         }
 
-        stage('Install AWS CLI (no sudo)') {
+        stage('Install AWS CLI (if needed)') {
             steps {
-                sh '''
-                if ! command -v aws &> /dev/null
-                then
-                    echo "AWS CLI not found, installing in local user space..."
-                    apt-get update -y && apt-get install -y unzip curl || true
-
-                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                    unzip awscliv2.zip
-                    ./aws/install --bin-dir $HOME/bin --install-dir $HOME/aws-cli --update
-
-                    export PATH=$HOME/bin:$PATH
-                fi
-
-                aws --version
-                '''
+                script {
+                    def awsCliExists = sh(script: "which aws", returnStatus: true) == 0
+                    if (!awsCliExists) {
+                        echo "AWS CLI not found, installing in user space..."
+                        sh '''
+                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                        unzip awscliv2.zip
+                        ./aws/install -i $HOME/aws-cli -b $HOME/.local/bin/aws
+                        '''
+                        // Add ~/.local/bin to PATH for this pipeline
+                        env.PATH = "${env.HOME}/.local/bin:${env.PATH}"
+                    } else {
+                        echo "AWS CLI found."
+                    }
+                }
             }
         }
 
         stage('Upload to S3') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                    sh '''
-                    export PATH=$HOME/bin:$PATH
-                    aws s3 sync . s3://$S3_BUCKET/ --delete --region $AWS_REGION
-                    '''
+                withEnv(["AWS_ACCESS_KEY_ID=${AWS_CREDENTIALS_USR}", "AWS_SECRET_ACCESS_KEY=${AWS_CREDENTIALS_PSW}", "AWS_DEFAULT_REGION=${AWS_REGION}"]) {
+                    sh """
+                    aws s3 sync ./ s3://${S3_BUCKET} --delete
+                    """
                 }
             }
         }
@@ -54,7 +55,9 @@ pipeline {
             echo "✅ Deployment successful!"
         }
         failure {
-            echo "❌ Deployment failed. Check the logs above."
+            echo "❌ Deployment failed. Check logs above."
         }
     }
 }
+
+
