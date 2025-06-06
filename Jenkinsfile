@@ -1,10 +1,9 @@
-
 pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'  // update if your bucket is in a different region
-        S3_BUCKET = 'priyanka-portfolio-bucket'  // ✅ replace with your actual bucket name
+        AWS_REGION = 'us-east-1'  // Change if your bucket is in a different region
+        S3_BUCKET = 'priyanka-portfolio-bucket'  // ✅ Use your actual bucket name
     }
 
     stages {
@@ -20,6 +19,8 @@ pipeline {
                 if ! command -v aws &> /dev/null
                 then
                     echo "AWS CLI not found, installing..."
+                    sudo apt-get update -y
+                    sudo apt-get install -y unzip curl
                     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
                     unzip awscliv2.zip
                     sudo ./aws/install
