@@ -1,41 +1,34 @@
-
 pipeline {
     agent any
 
     environment {
-        BUCKET_NAME = 'priyanka-portfolio-bucket'
-        AWS_REGION = 'us-east-1'
+        AWS_CREDENTIALS = credentials('aws-credentials-id')
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-credentials-id', url: 'https://github.com/Priyanka7777777/portfolio-website.git', branch: 'main'
+                git url: 'https://github.com/Priyanka7777777/portfolio-website.git', branch: 'main'
             }
         }
 
         stage('Upload to S3') {
-            environment {
-                AWS_ACCESS_KEY_ID = credentials('aws-credentials-id')
-                AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-            }
             steps {
-                sh '''
-                    echo "Uploading website to S3..."
-                    aws s3 sync . s3://$BUCKET_NAME --region $AWS_REGION --delete
-                '''
+                withEnv([
+                    "AWS_ACCESS_KEY_ID=${env.AWS_CREDENTIALS_USR}",
+                    "AWS_SECRET_ACCESS_KEY=${env.AWS_CREDENTIALS_PSW}"
+                ]) {
+                    sh '''
+                    aws s3 cp ./ s3://your-s3-bucket-name/ --recursive --acl public-read
+                    '''
+                }
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Deployment completed successfully!'
-        }
         failure {
             echo '❌ Deployment failed. Check logs above.'
         }
     }
 }
-
-
