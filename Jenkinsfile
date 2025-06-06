@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'  // Change if your bucket is in a different region
-        S3_BUCKET = 'priyanka-portfolio-bucket'  // ✅ Use your actual bucket name
+        AWS_REGION = 'us-east-1'
+        S3_BUCKET = 'priyanka-portfolio-bucket'
     }
 
     stages {
@@ -13,18 +13,21 @@ pipeline {
             }
         }
 
-        stage('Install AWS CLI (if not installed)') {
+        stage('Install AWS CLI (no sudo)') {
             steps {
                 sh '''
                 if ! command -v aws &> /dev/null
                 then
-                    echo "AWS CLI not found, installing..."
-                    sudo apt-get update -y
-                    sudo apt-get install -y unzip curl
+                    echo "AWS CLI not found, installing in local user space..."
+                    apt-get update -y && apt-get install -y unzip curl || true
+
                     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
                     unzip awscliv2.zip
-                    sudo ./aws/install
+                    ./aws/install --bin-dir $HOME/bin --install-dir $HOME/aws-cli --update
+
+                    export PATH=$HOME/bin:$PATH
                 fi
+
                 aws --version
                 '''
             }
@@ -38,6 +41,7 @@ pipeline {
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
                     sh '''
+                    export PATH=$HOME/bin:$PATH
                     aws s3 sync . s3://$S3_BUCKET/ --delete --region $AWS_REGION
                     '''
                 }
