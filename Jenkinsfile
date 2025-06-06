@@ -16,7 +16,7 @@ pipeline {
 
         stage('Upload to S3') {
             environment {
-                AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+                AWS_ACCESS_KEY_ID = credentials('aws-credentials-id')
                 AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
             }
             steps {
