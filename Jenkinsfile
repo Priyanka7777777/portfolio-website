@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -13,7 +12,8 @@ pipeline {
             steps {
                 git(
                     url: 'https://github.com/Priyanka7777777/portfolio-website.git',
-                    credentialsId: 'github-credentials-id', // Replace with your Jenkins GitHub credential ID
+                    // If repo is public, you can remove the credentialsId line below:
+                    // credentialsId: 'github-credentials-id',
                     branch: 'main'
                 )
             }
@@ -26,11 +26,11 @@ pipeline {
                     if (!awsCliExists) {
                         echo "AWS CLI not found, installing in user space..."
                         sh '''
+                        apt-get update && apt-get install -y unzip
                         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
                         unzip awscliv2.zip
-                        ./aws/install -i $HOME/aws-cli -b $HOME/.local/bin/aws
+                        ./aws/install -i $HOME/aws-cli -b $HOME/.local/bin
                         '''
-                        // Add ~/.local/bin to PATH for this pipeline
                         env.PATH = "${env.HOME}/.local/bin:${env.PATH}"
                     } else {
                         echo "AWS CLI found."
@@ -41,7 +41,11 @@ pipeline {
 
         stage('Upload to S3') {
             steps {
-                withEnv(["AWS_ACCESS_KEY_ID=${AWS_CREDENTIALS_USR}", "AWS_SECRET_ACCESS_KEY=${AWS_CREDENTIALS_PSW}", "AWS_DEFAULT_REGION=${AWS_REGION}"]) {
+                withEnv([
+                    "AWS_ACCESS_KEY_ID=${AWS_CREDENTIALS_USR}",
+                    "AWS_SECRET_ACCESS_KEY=${AWS_CREDENTIALS_PSW}",
+                    "AWS_DEFAULT_REGION=${AWS_REGION}"
+                ]) {
                     sh """
                     aws s3 sync ./ s3://${S3_BUCKET} --delete
                     """
@@ -59,5 +63,3 @@ pipeline {
         }
     }
 }
-
-
