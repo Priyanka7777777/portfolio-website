@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Priyanka's Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <button id="toggle-theme">Toggle Dark Mode</button>
+
+  <header>
+    <h1 id="typewriter"></h1>
+    <p>DevOps & AI Enthusiast</p>
+  </header>
+
+  <section>
+    <h2>About Me</h2>
+    <p>I love building automation and intelligent solutions using DevOps and AI tools.</p>
+  </section>
+
+  <section>
+    <h2>Skills</h2>
+    <ul>
+      <li>Python</li>
+      <li>Terraform</li>
+      <li>Jenkins</li>
+      <li>AWS</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Projects</h2>
+    <div>
+      <button onclick="filterProjects('all')">All</button>
+      <button onclick="filterProjects('ai')">AI</button>
+      <button onclick="filterProjects('devops')">DevOps</button>
+    </div>
+    <ul id="project-list">
+      <li class="project devops">CI/CD with Jenkins & Terraform</li>
+      <li class="project ai">AI Chatbot using OpenAI API</li>
+      <li class="project ai">Sentiment Analysis App</li>
+      <li class="project devops">Kubernetes Monitoring with Prometheus</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Contact Me</h2>
+    <form onsubmit="return validateForm()">
+      <input type="text" id="name" placeholder="Your Name" required><br>
+      <input type="email" id="email" placeholder="Your Email" required><br>
+      <textarea id="message" placeholder="Your Message" required></textarea><br>
+      <button type="submit">Send</button>
+    </form>
+    <p id="form-status"></p>
+  </section>
+
+  <footer>
+    <p>📧 Reach me at: priyanka@gmail.com</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

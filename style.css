@@ -1,0 +1,27 @@
+body {
+  font-family: sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  padding: 20px;
+}
+
+.dark {
+  background-color: #222;
+  color: #f4f4f4;
+}
+
+button {
+  padding: 8px 12px;
+  margin: 4px;
+  cursor: pointer;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+.project {
+  margin: 5px 0;
+}
