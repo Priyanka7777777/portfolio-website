@@ -18,7 +18,8 @@ pipeline {
                 ]]) {
                     sh '''
                     aws configure set region $AWS_REGION
-                    aws s3 cp ./ s3://$BUCKET_NAME/ --recursive --acl public-read
+                    aws s3 cp ./index.html s3://priyanka-portfolio-bucket/index.html
+
                     '''
                 }
             }
