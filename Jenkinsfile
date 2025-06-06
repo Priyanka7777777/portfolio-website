@@ -1,65 +1,41 @@
+
 pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1' // Change this to your AWS region
-        S3_BUCKET = 'priyanka-portfolio-bucket' // Change to your actual bucket name
-        AWS_CREDENTIALS = credentials('aws-credentials-id') // Jenkins credential ID for AWS access keys
+        BUCKET_NAME = 'priyanka-portfolio-bucket'
+        AWS_REGION = 'us-east-1'
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git(
-                    url: 'https://github.com/Priyanka7777777/portfolio-website.git',
-                    // If repo is public, you can remove the credentialsId line below:
-                    // credentialsId: 'github-credentials-id',
-                    branch: 'main'
-                )
-            }
-        }
-
-        stage('Install AWS CLI (if needed)') {
-            steps {
-                script {
-                    def awsCliExists = sh(script: "which aws", returnStatus: true) == 0
-                    if (!awsCliExists) {
-                        echo "AWS CLI not found, installing in user space..."
-                        sh '''
-                        apt-get update && apt-get install -y unzip
-                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                        unzip awscliv2.zip
-                        ./aws/install -i $HOME/aws-cli -b $HOME/.local/bin
-                        '''
-                        env.PATH = "${env.HOME}/.local/bin:${env.PATH}"
-                    } else {
-                        echo "AWS CLI found."
-                    }
-                }
+                git credentialsId: 'github-credentials-id', url: 'https://github.com/Priyanka7777777/portfolio-website.git', branch: 'main'
             }
         }
 
         stage('Upload to S3') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+            }
             steps {
-                withEnv([
-                    "AWS_ACCESS_KEY_ID=${AWS_CREDENTIALS_USR}",
-                    "AWS_SECRET_ACCESS_KEY=${AWS_CREDENTIALS_PSW}",
-                    "AWS_DEFAULT_REGION=${AWS_REGION}"
-                ]) {
-                    sh """
-                    aws s3 sync ./ s3://${S3_BUCKET} --delete
-                    """
-                }
+                sh '''
+                    echo "Uploading website to S3..."
+                    aws s3 sync . s3://$BUCKET_NAME --region $AWS_REGION --delete
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "✅ Deployment successful!"
+            echo '✅ Deployment completed successfully!'
         }
         failure {
-            echo "❌ Deployment failed. Check logs above."
+            echo '❌ Deployment failed. Check logs above.'
         }
     }
 }
+
+
