@@ -27,18 +27,3 @@ function filterProjects(tag) {
   });
 }
 
-// Contact Form Validation
-function validateForm() {
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const message = document.getElementById("message").value.trim();
-  const status = document.getElementById("form-status");
-
-  if (name && email && message) {
-    status.innerText = "✅ Message sent successfully!";
-    return true;
-  } else {
-    status.innerText = "⚠️ Please fill in all fields.";
-    return false;
-  }
-}
